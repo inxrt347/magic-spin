@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>казик</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="begin.css">
+</head>
+<body>
+    <div class="sparkle sp-1">✦</div>
+    <div class="sparkle sp-2">✦</div>
+    <div class="sparkle sp-3">✦</div>
+    <div class="sparkle sp-4">✦</div>
+    <div class="sparkle sp-5">✦</div>
+
+    <div class="game-wrapper">
+        <div class="game-container">
+            <div class="header">
+    <div class="balance-info">
+        <div class="label">BALANCE</div>
+        <div class="balance-display">67</div>
+    </div>
+
+    <div class="controls-group">
+        <div class="bet-section">
+            <span id="bet" class="label">BET:</span>
+            <input type="number" id="betInput" class="bet-input" value="10" min="1">
+        </div>
+        
+        <button class="spin-button" onclick="playSpin()">
+            SPIN <span class="refresh"></span>
+        </button>
+    </div>
+</div>
+ <div class="slots-area">
+                <div id="slot1" class="slot-box"><div class="emoji">😊</div></div>
+                <div id="slot2" class="slot-box"><div class="emoji">😊</div></div>
+                <div id="slot3" class="slot-box"><div class="emoji">😊</div></div>
+            </div>
+
+            <div id="message" class="label">УДАЧИ!</div>
+</div>
+
+            
+        </div>
+    </div>
+
+    <script>
+        class VisualSlotMachine {
+    #balance;
+    #symbols = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
+    #bet = 10;
+
+    constructor(initialDeposit) {
+        this.#balance = initialDeposit;
+        this.betInput = document.getElementById('betInput');
+        this.balanceDisplay = document.querySelector('.balance-display');
+        this.messageDisplay = document.getElementById('message');
+        
+        // Ссылка на контейнеры-боксы
+        this.slotBoxes = [
+            document.getElementById('slot1'),
+            document.getElementById('slot2'),
+            document.getElementById('slot3')
+        ];
+
+        this.updateUI();
+    }
+
+    updateUI(reels = null, message = "УДАЧИ!") {
+        this.messageDisplay.textContent = message;
+        this.balanceDisplay.textContent = this.#balance;
+
+        if (reels) {
+            reels.forEach((symbol, i) => {
+                this.slotBoxes[i].innerHTML = `<div class="emoji">${symbol}</div>`;
+            });
+        }
+    }
+
+    async spin() {
+        this.#bet = Number(this.betInput.value);
+
+        if (this.#balance < this.#bet) {
+            this.messageDisplay.textContent = "НЕДОСТАТОЧНО СРЕДСТВ!";
+            return;
+        }
+
+        this.#balance -= this.#bet;
+        this.balanceDisplay.textContent = this.#balance;
+        this.messageDisplay.textContent = "КРУТИМ...";
+
+        const results = [
+            this.#symbols[Math.floor(Math.random() * 5)],
+            this.#symbols[Math.floor(Math.random() * 5)],
+            this.#symbols[Math.floor(Math.random() * 5)]
+        ];
+
+        // Запускаем анимацию для каждого барабана
+        const promises = this.slotBoxes.map((box, i) => this.#animateReel(box, i, results[i]));
+        
+        // Ждем окончания всех анимаций
+        await Promise.all(promises);
+        
+        // Проверяем результат
+        this.#checkResult(results);
+    }
+
+    #animateReel(box, index, finalSymbol) {
+        return new Promise(resolve => {
+            const numSymbols = 30; // Длина ленты для крутки
+            let stripHtml = '';
+            
+            // Генерируем "ленту" символов
+            for (let i = 0; i < numSymbols; i++) {
+                const sym = this.#symbols[Math.floor(Math.random() * 5)];
+                stripHtml += `<div class="emoji">${sym}</div>`;
+            }
+            // Добавляем финальный символ в самый конец ленты
+            stripHtml += `<div class="emoji">${finalSymbol}</div>`;
+            
+            // Создаем элемент ленты
+            const reel = document.createElement('div');
+            reel.className = 'symbol-reel blur';
+            reel.innerHTML = stripHtml;
+            
+            box.innerHTML = '';
+            box.appendChild(reel);
+
+            // Устанавливаем начальную позицию
+            reel.style.top = '0px';
+
+            // Запускаем движение (через небольшую задержку для срабатывания transition)
+            setTimeout(() => {
+                const symbolHeight = 180; // Высота одного слота (из CSS)
+                const travelDistance = numSymbols * symbolHeight;
+                
+                reel.style.transition = `top ${2 + index * 0.5}s cubic-bezier(0.45, 0.05, 0.55, 0.95)`;
+                reel.style.top = `-${travelDistance}px`;
+            }, 50);
+
+            // Когда анимация закончилась
+            setTimeout(() => {
+                reel.classList.remove('blur');
+                // Заменяем ленту на один статичный финальный символ
+                box.innerHTML = `<div class="emoji" style="animation: slotBounce 0.4s ease;">${finalSymbol}</div>`;
+                resolve();
+            }, 2000 + index * 500);
+        });
+    }
+
+    #checkResult(result) {
+        let winAmount = 0;
+        let msg = "ПОПРОБУЙ ЕЩЕ!";
+
+        if (result[0] === result[1] && result[1] === result[2]) {
+            winAmount = result[0] === '7️⃣' ? this.#bet * 5 : this.#bet * 3;
+            msg = `ДЖЕКПОТ: +${winAmount}!`;
+        } else if (result[0] === result[1] || result[1] === result[2] || result[0] === result[2]) {
+            winAmount = this.#bet * 1.5;
+            msg = `ВЫИГРЫШ: +${winAmount}!`;
+        }
+
+        this.#balance += winAmount;
+        this.updateUI(null, msg);
+    }
+}
+
+const game = new VisualSlotMachine(7000);
+function playSpin() { game.spin(); }
+        
+    </script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+:root {
+    /* Градиент: фиолетовый -> синий */
+    --bg-gradient: linear-gradient(135deg, #f4eaff 0%, #bdd6ff 100%);
+    --panel-bg: #c5e2ff;
+    --border-light: #ffffff;
+    --border-blue: #cde6ff;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--bg-gradient);
+    font-family: 'Press Start 2P', cursive;
+    overflow: hidden;
+}
+
+/* Стеклянная подложка вокруг игры */
+.game-wrapper {
+    background: rgba(255, 255, 255, 0.4);
+    padding: 15px;
+    border-radius: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+}
+
+.game-container {
+    width: 750px;
+    height: 450px;
+    background: #cee8ff;
+    border: 6px solid var(--border-blue);
+    border-radius: 30px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    box-shadow: inset 0 0 20px rgba(255,255,255,0.5);
+}
+
+/* Шапка */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.label {
+    color: #96bbff;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+#bet{
+    margin-top: +20px;
+}
+
+#message{
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.balance-display {
+    color: white;
+    font-size: 36px;
+    text-shadow: 3px 3px 0px #96bbff;
+}
+
+/* Кнопка */
+.spin-button {
+    background: #eef7ff;
+    border: 4px solid var(--border-blue);
+    border-radius: 15px;
+    padding: 15px 25px;
+    color: #96bbff;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #b8d1ff;
+    transition: 0.1s;
+}
+
+.spin-button:active {
+    transform: translateY(4px);
+    box-shadow: 0 0px 0 #96bbff;
+}
+
+/* Слоты */
+.slots-area {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.slot-box {
+    width: 180px;
+    height: 180px;
+    background: linear-gradient(180deg, #ffffff 0%, #e1f0ff 100%);
+    border: 4px solid var(--border-blue);
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 0 0 10px rgba(142, 191, 255, 0.3);
+
+}
+
+.emoji {
+    font-size: 80px;
+    /* Эффект пикселизации для эмодзи (не во всех браузерах) */
+    image-rendering: pixelated; 
+}
+
+/* Белые искорки (менее заметные) */
+.sparkle {
+    position: absolute;
+    color: white;
+    font-size: 24px;
+    opacity: 0.5;
+    animation: blink 3s infinite ease-in-out;
+    pointer-events: none;
+}
+
+.sp-1 { top: 10%; left: 15%; animation-delay: 0s; }
+.sp-2 { top: 5%; right: 10%; animation-delay: 1s; }
+.sp-3 { bottom: 15%; left: 5%; animation-delay: 2s; }
+.sp-4 { bottom: 20%; right: 20%; animation-delay: 0.5s; }
+.sp-5 { top: 50%; right: 5%; animation-delay: 1.5s; }
+
+@keyframes blink {
+    0%, 100% { opacity: 0.1; transform: scale(0.8); }
+    50% { opacity: 0.6; transform: scale(1.2); }
+}
+
+@keyframes slotBounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+/* Контейнер для выравнивания в ряд */
+/* Группировка ставки и кнопки в один ряд */
+.controls-group {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/* Секция ставки с надписью */
+.bet-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    
+}
+
+/* Общие параметры размера для кнопки и инпута */
+.spin-button, .bet-input {
+    height: 54px; /* Высота как у оригинальной кнопки */
+    border: 4px solid var(--border-blue);
+    border-radius: 20px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 18px;
+    box-sizing: border-box;
+}
+
+/* Настройка поля ввода */
+.bet-input {
+    width: 100px;
+    background: #ffffff;
+    color: #96bbff;
+    text-align: center;
+    outline: none;
+    box-shadow: 0 4px 0 #b8d1ff;
+    padding: 0;
+}
+
+/* Оригинальный стиль кнопки SPIN */
+.spin-button {
+    width: 160px;
+    background: #ffffff;
+    color: #96bbff;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #b8d1ff;
+    transition: 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.spin-button:active {
+    transform: translateY(4px);
+    box-shadow: 0 0px 0 #96bbff;
+}
+
+/* Убираем лишние стрелочки в поле числа */
+.bet-input::-webkit-outer-spin-button,
+.bet-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+/* Анимация вращения барабана */
+@keyframes slotSpin {
+    0% { transform: translateY(-20px); filter: blur(2px); }
+    50% { transform: translateY(20px); filter: blur(5px); }
+    100% { transform: translateY(-20px); filter: blur(2px); }
+}
+
+.spinning {
+    animation: slotSpin 0.1s infinite linear;
+}
+
+/* Плавное появление финального символа */
+@keyframes popIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.win-flash {
+    animation: slotBounce 0.5s ease;
+}
+/* Обновляем контейнер слота для маскировки */
+
+/* Лента с эмодзи внутри слота */
+.symbol-reel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: absolute; /* Важно! */
+    width: 100%;
+    top: 0;
+}
+
+.slot-box {
+    overflow: hidden; /* Чтобы не видеть ленту за пределами квадрата */
+    position: relative; /* Для позиционирования ленты внутри */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
