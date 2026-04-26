@@ -113,30 +113,38 @@
 
     async pay() {
     try {
-        // Меняем сообщение на статус загрузки
-        this.messageDisplay.textContent = "ПОЛУЧЕНИЕ ССЫЛКИ...";
+        this.messageDisplay.textContent = "ЗАПРОС...";
 
         const res = await fetch('https://inxrt.pythonanywhere.com/get_invoice', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ user_id: tg.initDataUnsafe.user?.id })
+            body: JSON.stringify({ user_id: tg.initDataUnsafe.user?.id || 0 })
         });
+
+        // Если сервер ответил, но с ошибкой (например, 404 или 500)
+        if (!res.ok) {
+            const errorText = await res.text();
+            this.messageDisplay.textContent = `SERVER ERR: ${res.status} ${errorText.slice(0, 20)}`;
+            return;
+        }
 
         const data = await res.json();
-        const link = data.link;
-
-        // ОТОБРАЖАЕМ ССЫЛКУ В ТЕГЕ MESSAGE
-        this.messageDisplay.textContent = link;
-
-        // Если нужно, чтобы инвойс все равно открывался, оставляем строку ниже.
-        // Если хочешь просто потестить ссылку — закомментируй её.
-        tg.openInvoice(link, (status) => {
-            if (status === 'paid') this.spin();
-        });
+        
+        // Выводим ссылку (или весь JSON, если ссылки нет)
+        if (data.link) {
+            this.messageDisplay.textContent = data.link;
+            
+            tg.openInvoice(data.link, (status) => {
+                if (status === 'paid') this.spin();
+            });
+        } else {
+            this.messageDisplay.textContent = JSON.stringify(data).slice(0, 30);
+        }
 
     } catch (error) {
-        this.messageDisplay.textContent = "ОШИБКА СЕТИ!";
-        console.error("Ошибка при получении инвойса:", error);
+        // Выводим причину, почему fetch вообще не достучался до сервера
+        this.messageDisplay.textContent = `FETCH ERR: ${error.message}`;
+        console.error("Full error:", error);
     }
 }
 
