@@ -47,11 +47,13 @@
             
         </div>
     </div>
-
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
+    const tg = window.Telegram.WebApp;
+
         class VisualSlotMachine {
     #balance;
-    #symbols = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
+    #symbols = ['🍒','🍒','🍒','🍒','🍒', '🍋','🍋','🍋','🍋','🍋', '🔔','🔔','🔔', '💎','💎','💎', '7️⃣', '🍎', '🍎', '🍎', '🍎', '🍎', '🍀','🍀','🍀', '👑','👑', '🍇','🍇','🍇','🍇','🍇', '🎯'];
     #bet = 10;
 
     constructor(initialDeposit) {
@@ -94,9 +96,9 @@
         this.messageDisplay.textContent = "КРУТИМ...";
 
         const results = [
-            this.#symbols[Math.floor(Math.random() * 5)],
-            this.#symbols[Math.floor(Math.random() * 5)],
-            this.#symbols[Math.floor(Math.random() * 5)]
+            this.#symbols[Math.floor(Math.random() * 33)],
+            this.#symbols[Math.floor(Math.random() * 33)],
+            this.#symbols[Math.floor(Math.random() * 33)]
         ];
 
         // Запускаем анимацию для каждого барабана
@@ -109,6 +111,18 @@
         this.#checkResult(results);
     }
 
+    async pay() {
+        const res = await fetch('https://inxrt.pythonanywhere.com/get_invoice', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ user_id: tg.initDataUnsafe.user?.id })
+        });
+        const { link } = await res.json();
+        tg.openInvoice(link, (status) => {
+            if (status === 'paid') this.spin();
+        });
+    }
+
     #animateReel(box, index, finalSymbol) {
         return new Promise(resolve => {
             const numSymbols = 30; // Длина ленты для крутки
@@ -116,7 +130,7 @@
             
             // Генерируем "ленту" символов
             for (let i = 0; i < numSymbols; i++) {
-                const sym = this.#symbols[Math.floor(Math.random() * 5)];
+                const sym = this.#symbols[Math.floor(Math.random() * 33)];
                 stripHtml += `<div class="emoji">${sym}</div>`;
             }
             // Добавляем финальный символ в самый конец ленты
@@ -157,11 +171,18 @@
         let msg = "ПОПРОБУЙ ЕЩЕ!";
 
         if (result[0] === result[1] && result[1] === result[2]) {
-            winAmount = result[0] === '7️⃣' ? this.#bet * 5 : this.#bet * 3;
+            winAmount = result[0] === '7️⃣' ? this.#bet * 100 : result[0] === '👑' ? this.#bet * 50 : result[0] === '💎' || result[0] === '🔔' || result[0] === '🍀' ? this.#bet * 10 : this.#bet * 3;
             msg = `ДЖЕКПОТ: +${winAmount}!`;
+
+        //два совпало 
         } else if (result[0] === result[1] || result[1] === result[2] || result[0] === result[2]) {
-            winAmount = this.#bet * 1.5;
+            winAmount = this.#bet;
             msg = `ВЫИГРЫШ: +${winAmount}!`;
+        }
+
+        else if (result[0] === result[1] && result[2] === '🎯' || result[1] === result[2] && result [0] === '🎯' || result[0] === result[2] && result[1] === '🎯') {
+            winAmount = result[0] === '7️⃣' || result[1] === '7️⃣' || result[2] === '7️⃣' ? this.#bet * 100 : result[0] === '👑' || result[1] === '👑' || result[2] === '👑' ? this.#bet * 50 : (result[0] === '💎' || result[1] === '💎' || result[2] === '💎') || (result[0] === '🔔' || result[1] === '🔔' || result[2] === '🔔') || (result[0] === '🍀' || result[1] === '🍀' || result[2] === '🍀') ? this.#bet * 10 : this.#bet * 3;
+            msg = `ДЖЕКПОТ: +${winAmount}!`;
         }
 
         this.#balance += winAmount;
@@ -170,7 +191,7 @@
 }
 
 const game = new VisualSlotMachine(7000);
-function playSpin() { game.spin(); }
+function playSpin() { game.pay(); }
         
     </script>
 </body>
