@@ -298,3 +298,12 @@ body {
     top: 0;
 }
 
+/* Стиль для ссылки на магазин */
+.header a {
+    transition: transform 0.2s;
+    display: inline-block;
+}
+
+.header a:hover {
+    transform: scale(1.1);
+}
